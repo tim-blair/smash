@@ -3,20 +3,20 @@ object ParseLine {
 		val reader = new InputReader
 		val parser = new LineParser
 		val exec = new Executor
+		val builtinMgr = new BuiltinManager
 		
-		//TODO: need to handle /path/to/cmd without adding . to the path
-		//TODO: tail recursion this
-		var keepGoing = true
-		while(keepGoing) {
+		def process():Unit = {
 			print("> ")
 			val line = reader.read
-			if(line == "exit")
-				keepGoing = false
-			else {
+			if(line != "exit") {
 				val (cmd, args) = parser.parse(line)
-				exec.execute(cmd, args)
+				if(!builtinMgr.handle(cmd, args))
+					exec.execute(cmd, args)
+				process()
 			}
 		}
+
+		process()
 		//TODO: catch the exceptions thrown by the parser
 		//TODO: have a custom exception type
 	}
