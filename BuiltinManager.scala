@@ -1,6 +1,6 @@
-class BuiltinManager {
+object BuiltinManager {
 	//This should really be a set/map, and we can just do a get...
-	val builtins = List(new cd)
+	private val builtins: List[Builtin] = List(new cd, new which)
 
 	def handle(cmd: String, args: List[String]) = {
 		builtins.filter(b => b.name == cmd) match {
@@ -8,4 +8,7 @@ class BuiltinManager {
 			case Nil => false
 		}
 	}
+
+	def contains(cmd: String): Boolean =
+		!builtins.filter(b => b.name == cmd).isEmpty
 }

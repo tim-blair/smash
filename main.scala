@@ -3,7 +3,6 @@ object ParseLine {
 		val reader = new InputReader
 		val parser = new LineParser
 		val exec = new Executor
-		val builtinMgr = new BuiltinManager
 		
 		def process():Unit = {
 			print("> ")
@@ -11,7 +10,9 @@ object ParseLine {
 			if(line != "exit") {
 				try {
 					val (cmd, args) = parser.parse(line)
-					if(!builtinMgr.handle(cmd, args))
+					if(BuiltinManager.contains(cmd))
+						BuiltinManager.handle(cmd, args)
+					else
 						exec.execute(cmd, args)
 				} catch {
 					case e: Exception => println(e.getMessage)

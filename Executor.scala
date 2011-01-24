@@ -11,7 +11,7 @@ class Executor {
 			else
 				None
 		} else
-			findOnPath(cmd)
+			Executor.findOnPath(cmd)
 		) match {
 			case Some(s) => run(s :: args)
 			//TODO: differentiate between not found and not allowed
@@ -33,7 +33,9 @@ class Executor {
 			.takeWhile(_ != -1)
 			.foreach(x => print(new String(buffer)))
 	}
+}
 
+object Executor {
 	//JVM probably does this too, which might cause some funny-ness
 	def findOnPath(cmd: String): Option[String] = {
 		val executables = for( dir <- Environment.pathDirs; 
