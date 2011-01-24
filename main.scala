@@ -17,7 +17,8 @@ object ParseLine {
 		}
 
 		process()
-		//TODO: catch the exceptions thrown by the parser
+		//TODO: catch the exceptions thrown by the parser/etc
 		//TODO: have a custom exception type
+		//TODO: this doesn't work for things that run in the terminal (vim)
 	}
 }
