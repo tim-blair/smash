@@ -4,7 +4,15 @@ class Executor {
 	//Right now we just print the output, but...
 	//eventually it would be nice to be able to do pipes/redirection, etc
 	def execute(cmd: String, args: List[String]) = {
-		val executable = findOnPath(cmd) match {
+		(if(cmd.contains("/")) {
+			val f = new File(cmd)
+			if(f.canExecute)
+				Some(f)
+			else
+				None
+		} else
+			findOnPath(cmd)
+		) match {
 			case Some(s) => run(s + " " + args.mkString(" "))
 			//TODO: differentiate between not found and not allowed
 			case None => println("Command not found")

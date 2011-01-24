@@ -1,36 +1,29 @@
 import scala.util.parsing.combinator._
 
-//For now, no backslash...
-
-// \s means whitespace
-// \w is word (letter, digit, underscore)
-//Probably could be another parser...
+//For now, no backslash, or any fanciness, really
 class LineParser extends RegexParsers {
-
 //Give me my whitespace!
 //thanks to http://oldfashionedsoftware.com/2008/08/16/easy-parsing-in-scala/
+//Prog in Scala says we can do: override val whiteSpace = "".r, too
 	override def skipWhitespace = false
 
-	def char: Parser[String] = """[-\w./+]""".r
+	// Not sure if '=' is valid for a cmd, but it is for an arg
+	def char: Parser[String] = """[-\w./+=]""".r
 	def ws: Parser[Unit] = """\s+""".r ^^ (x => Unit)
 	//TODO: single quotes
-	def string: Parser[String] = "\"" ~> rep("""[^"]""".r) <~ "\"" ^^ (_.mkString)
+	def string: Parser[List[String]] = "\"" ~> rep("""[^"]""".r) <~ "\""
 	def command: Parser[String] = rep(char) ^^ (_.mkString)
-	def argument: Parser[String] = (rep(char) | string) ^^ {
-		case x: String => x 
+	def argument: Parser[String] = (string | rep(char)) ^^ {
 		case x :: xs => (x :: xs).mkString 
+		case Nil => "" //empty list => empty string
 	}
-	//If I trim I can ignore the opt(ws) at the start and end...
-	def line: Parser[String ~ Option[List[String]]] = opt(ws) ~> command ~ 
-		opt(rep(ws ~> argument)) <~ opt(ws)
+	def line: Parser[String ~ Option[List[String]]] = 
+		(command | failure("Could not parse command")) ~ 
+			opt(rep(ws ~> argument))
 
-	//repsep is rep with a separator
-	//javatokenparsers has a stringliteral that matches "this" or "that"
 	def parse(arg: String): (String, List[String]) = {
 		val parsed = parseAll(line, arg.trim)
 		val cmd = parsed match {
-			//case ~(x:String, Some(list)) => (x, list)
-			//case ~(x:String, None) => (x, Nil)
 			case Success((x ~ Some(list)), in) => (x, list)
 			case Success((x ~ None), in) => (x, Nil)
 			case Failure(msg, in) => throw new Exception(msg)

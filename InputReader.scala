@@ -1,7 +1,4 @@
 class InputReader {
-	//val buffer = new Array[Byte](1024)
-	//Stream.continually(out.read(buffer))
-		//.takeWhile(_ != -1)
 	//Dumb impl for now
 	val lp = new LineParser
 	val lines = io.Source.stdin.getLines
