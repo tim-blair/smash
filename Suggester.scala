@@ -1,16 +1,25 @@
 object Suggester {
 	//TODO: check builtins, too
+	//This still needs some work... maybe favourites, too?
 	val len = (x: String, cmd: String) => if(x.length == cmd.length) 1 else 0
 	val prefix = (x: String, cmd: String) => longestPrefix(x, cmd)
 	val subseq = (x: String, cmd: String) => longestSubseq(x, cmd)
 	val substr = (x: String, cmd: String) => longestSubstr(x, cmd)
+	val dist = (x: String, cmd: String) => -distance(x, cmd)
 
-	val filters = List(len, prefix, subseq, substr)
+	val filters = List( len, prefix, subseq, substr) //, dist) 
+
+	def score(cmd: String, x: String) = {
+		var total = 0
+		for(f <- filters)
+			total = total + f(x, cmd)
+		total
+	}
 
 	def findClose(cmd: String) = {
 		val executables = for( dir <- Environment.pathDirs; 
-			f <- dir.listFiles; dist = distance(f.getName, cmd);
-			if dist < 3 && f.canExecute
+			f <- dir.listFiles; 
+			if f.canExecute && distance(f.getName, cmd) < 3
 		) yield f
 		if(executables.isEmpty)
 			None
@@ -58,7 +67,7 @@ object Suggester {
 
 	def longestPrefix(x: String, y: String) = {
 		var pre = 0
-		while(x.length < pre && y.length < pre && x(pre) == y(pre))
+		while(x.length > pre && y.length > pre && x(pre) == y(pre))
 			pre = pre + 1
 		pre
 	}
