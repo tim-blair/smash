@@ -1,4 +1,4 @@
-class InputReader {
+object InputReader {
 	//Dumb impl for now
 	val lp = new LineParser
 	val lines = io.Source.stdin.getLines
