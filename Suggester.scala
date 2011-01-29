@@ -1,13 +1,16 @@
 object Suggester {
 	//TODO: check builtins, too
-	//This still needs some work... maybe favourites, too?
+	//TODO: obviously favourites should be more dynamic than this...
+	// maybe start with file based, and move to an actual learning based one
+	val favourites = List("vim", "scala", "ls", "cd", "cat")
 	val len = (x: String, cmd: String) => if(x.length == cmd.length) 1 else 0
 	val prefix = (x: String, cmd: String) => longestPrefix(x, cmd)
 	val subseq = (x: String, cmd: String) => longestSubseq(x, cmd)
 	val substr = (x: String, cmd: String) => longestSubstr(x, cmd)
 	val dist = (x: String, cmd: String) => -distance(x, cmd)
+	val favourite = (x: String, cmd: String) => if(favourites.contains(x)) 2 else 0
 
-	val filters = List( len, prefix, subseq, substr) //, dist) 
+	val filters = List( len, prefix, subseq, substr, favourite, dist) 
 
 	def score(cmd: String, x: String) = {
 		var total = 0
