@@ -15,7 +15,13 @@ class Executor {
 		) match {
 			case Some(s) => run(s :: args)
 			//TODO: differentiate between not found and not allowed
-			case None => Printer ! Message("Command not found")
+			case None => {
+				Suggester.findClose(cmd) match {
+					//getAbsolutePath
+					case None => Printer ! Message("Command not found")
+					case Some(s) => Printer ! Message("Bet you meant: " + s)
+				}
+			}
 		}
 	}
 
