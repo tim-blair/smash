@@ -6,9 +6,21 @@ object Printer extends Actor {
 			react {
 				case Stop => exit()
 				case Prompt => print("> ")
+				case Character(c) => print(c)
 				case Output(msg) => print(msg)
 				case Message(msg) => println(msg)
+				case Backspace => {
+					csi("1D") //move right 1
+					csi("0K") //delete to the right
+				}
 			}
 		}
+	}
+
+	//Print a control sequence introduce followed by the sequence
+	def csi(str: String) = {
+		print('\033')
+		print('\133')
+		print(str)
 	}
 }
