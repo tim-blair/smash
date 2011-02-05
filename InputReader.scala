@@ -1,8 +1,6 @@
 import scala.actors._
 object InputReader extends Actor {
-	val ttyConfig = stty("-g")
-	stty("-icanon min 1")
-	stty("-echo")
+	var ttyConfig = ""
 
 	def act() {
 		loop {
@@ -10,8 +8,24 @@ object InputReader extends Actor {
 				case Stop => exit()
 				//Not good, we shouldn't block in an actor
 				case ReadLine(x) => readLine(x)
+				case ReadAvail(x) => readWhileAvailable(x)
+				case ReadIfAvail(x) => readIfAvailable(x)
+				case Read(x) => read(x)
+				case Cook => cook()
+				case Raw => raw()
 			}
 		}
+	}
+
+	// The executor can use this to pass stdin into the program we are running
+	def readWhileAvailable(requester: Actor) = {
+		while(System.in.available() != 0)
+			requester ! Character(System.in.read().byteValue.toChar)
+	}
+
+	def readIfAvailable(requester: Actor) = {
+		if(System.in.available() != 0)
+			requester ! Character(System.in.read().byteValue.toChar)
 	}
 
 	//Read a line, or until we get an actable character (tab, arrow, etc)
@@ -47,15 +61,21 @@ object InputReader extends Actor {
 	}
 
 	def reply(c: Char, recipient: Actor) {
-		if(c == '\177') {
+		if(c == '\177')
 			recipient ! Backspace
-			Printer ! Backspace
-		} else {
+		else
 			recipient ! Character(c)
-			Printer ! Character(c)
-		}
 	}
 
+	def cook() = {
+		stty(ttyConfig.trim)
+	}
+
+	def raw() = {
+		ttyConfig = stty("-g")
+		stty("-icanon min 1")
+		stty("-echo")
+	}
 	//TODO: send these through the executor
 	def stty(arg: String) = {
 		val cmd = "stty " + arg + " < /dev/tty"
@@ -65,5 +85,12 @@ object InputReader extends Actor {
 	def exec(cmd: List[String]) = {
 		val p = Runtime.getRuntime().exec(cmd.toArray)
 		p.waitFor
+		//This is a bit of a hack to get the ttyConfig back, but I know
+		//it will only be a few bytes, so it should be OK
+		val in = p.getInputStream()
+		val buffer = new Array[Byte](1024)
+		Stream.continually(in.read(buffer))
+			.takeWhile(_ != -1)
+		new String(buffer)
 	}
 }

@@ -11,12 +11,20 @@ object InputBuilder extends Actor {
 				case DownArrow => "" //we don't have a history yet
 				case LeftArrow => "" //we don't have a history yet
 				case RightArrow => "" //we don't have a history yet
-				case Backspace => if(!line.isEmpty) line = line.tail
+				case Backspace => {
+					if(!line.isEmpty) 
+						line = line.tail
+					Printer ! Backspace
+				}
 				case Character(10) => {
 					requester ! Line(line.reverse.mkString)
 					line = Nil
+					Printer ! Character('\012')
 				}
-				case Character(x) => line = x :: line
+				case Character(x) => {
+					line = x :: line
+					Printer ! Character(x)
+				}
 				case ReadLine(x) => {
 					requester = x
 					InputReader ! ReadLine(this)

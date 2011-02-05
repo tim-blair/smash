@@ -21,12 +21,18 @@ object MainActor extends Actor {
 	val exec = new Executor
 	def act() {
 		loop {
+			println("Main: ready for next message")
 			react {
 				case Next => {
+					println("Got: Next")
+					InputReader ! Raw
 					Printer ! Prompt
 					InputBuilder ! ReadLine(this)
 				}
 				case Line(line) => {
+					InputReader ! Cook
+					println("Got: Line")
+					//TODO: exit should be a builtin
 					if(line == "exit") {
 						Printer ! Stop
 						InputReader ! Stop
@@ -35,15 +41,18 @@ object MainActor extends Actor {
 					} else if(line != "") {
 						try {
 							val (cmd, args) = parser.parse(line)
-							if(BuiltinManager.contains(cmd))
+							if(BuiltinManager.contains(cmd)) {
 								BuiltinManager.handle(cmd, args)
-							else
+								this ! Next
+							} else
 								//TODO: make this a message
 								exec.execute(cmd, args)
 						} catch {
 							case e: Exception => Printer ! Message(e.getMessage)
+							this ! Next
 						}
-						//TODO: this should come from executor
+					} else { //empty line
+						Printer ! Message("")
 						this ! Next
 					}
 				}
