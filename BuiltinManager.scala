@@ -1,6 +1,6 @@
 object BuiltinManager {
 	//This should really be a set/map, and we can just do a get...
-	private val builtins: List[Builtin] = List(new cd, new which)
+	private val builtins: List[Builtin] = List(cd, which)
 
 	def names =
 		for(b <- builtins) yield b.name

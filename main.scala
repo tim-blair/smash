@@ -11,7 +11,6 @@ object ParseLine {
 		
 		//TODO: have a custom exception type
 		//TODO: this doesn't work for things that run in the terminal (vim)
-		//TODO: have a printing obj (actor?)
 		//BUG: ctl-C kills the shell
 	}
 }
@@ -21,17 +20,14 @@ object MainActor extends Actor {
 	val exec = new Executor
 	def act() {
 		loop {
-			println("Main: ready for next message")
 			react {
 				case Next => {
-					println("Got: Next")
 					InputReader ! Raw
 					Printer ! Prompt
 					InputBuilder ! ReadLine(this)
 				}
 				case Line(line) => {
 					InputReader ! Cook
-					println("Got: Line")
 					//TODO: exit should be a builtin
 					if(line == "exit") {
 						Printer ! Stop

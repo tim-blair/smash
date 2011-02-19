@@ -14,17 +14,14 @@ class Job(pb: ProcessBuilder) extends Actor {
 		jobDoneAlerter.start()
 
 		loop {
-			println("Job is ready for a command")
 			react {
 				case Stop => {
-					println("Job got a stop")
 					proc.destroy()
 					procInputHandler ! Stop
 					MainActor ! Next
 					exit()
 				}
 				case Done => {
-					println("Job got a done")
 					procInputHandler ! Stop
 					MainActor ! Next
 					exit()
@@ -36,7 +33,7 @@ class Job(pb: ProcessBuilder) extends Actor {
 
 //TODO: rumour has it that this may need to be in cooked mode...
 //Victory? vim/top don't work because they need a tty... so I'll have to figure
-//that one out
+//that one out. Looks like JNI is the only way to go
 class ProcessInputHandler(proc: Process) extends Actor {
 	def act() = {
 		val out = proc.getOutputStream()

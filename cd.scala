@@ -1,15 +1,10 @@
 import java.io.File
 
-class cd extends Builtin {
+object cd extends Builtin {
 	override val name = "cd"
 	//Get the current dir, or fall back to HOME, or just /home
-	private var prevDir = Environment.env.get("PWD") match {
-		case Some(s) => s
-		case None => Environment.env.get("HOME") match {
-			case Some(s) => s
-			case None => "/home"
-		}
-	}
+	var prevDir = Environment.env.getOrElse("PWD", 
+		Environment.env.getOrElse("HOME", "/home"))
 
 	override def execute(args: List[String]) = {
 		//I think we just change the PWD variable

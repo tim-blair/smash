@@ -1,1 +1,1 @@
-This is a (currently not overly functional) shell written in scala. I've abondoned it because vim wants to talk to a tty directly, and I can't figure out how to do that in the jvm
+This is a (currently not overly functional) shell written in scala.

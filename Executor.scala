@@ -4,7 +4,9 @@ import scala.collection.JavaConverters._
 class Executor {
 	//Right now we just print the output, but...
 	//eventually it would be nice to be able to do pipes/redirection, etc
-	def execute(cmd: String, args: List[String]) = {
+	def execute(cmd: String, args: List[String]): Unit = {
+		if(cmd.startsWith("."))
+			return execute(cd.prevDir + "/" + cmd, args)
 		(if(cmd.contains("/")) {
 			if(new File(cmd).canExecute)
 				Some(cmd)
@@ -16,11 +18,13 @@ class Executor {
 			case Some(s) => run(s :: args)
 			//TODO: differentiate between not found and not allowed
 			case None => {
-				Suggester.findClose(cmd) match {
+				Printer ! Message("Command not found: " + cmd)
+                //The performance on this is pretty bad...
+				/*Suggester.findClose(cmd) match {
 					//getAbsolutePath
 					case None => Printer ! Message("Command not found")
 					case Some(s) => Printer ! Message("Bet you meant: " + s)
-				}
+				}*/
 				MainActor ! Next
 			}
 		}
