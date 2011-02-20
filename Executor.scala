@@ -15,7 +15,9 @@ class Executor {
 		} else
 			Executor.findOnPath(cmd)
 		) match {
-			case Some(s) => run(s :: args)
+			case Some(s) => 
+				if(cmd == "vim") new Launcher().runVim 
+				else run(s :: args)
 			//TODO: differentiate between not found and not allowed
 			case None => {
 				Printer ! Message("Command not found: " + cmd)
