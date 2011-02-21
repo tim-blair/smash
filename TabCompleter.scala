@@ -1,11 +1,11 @@
+import java.io.File
 import scala.util.parsing.combinator._
+import scala.collection.JavaConverters._
 
-//For now, no backslash, or any fanciness, really
-object LineParser extends RegexParsers {
-//Give me my whitespace!
-//thanks to http://oldfashionedsoftware.com/2008/08/16/easy-parsing-in-scala/
-//Prog in Scala says we can do: override val whiteSpace = "".r, too
+object TabCompleter extends RegexParsers {
 	override def skipWhitespace = false
+
+	//TODO: share these rules with LineParser
 
 	// Not sure if '=' is valid for a cmd, but it is for an arg
 	def char: Parser[String] = """[-\w./+=]""".r
@@ -25,8 +25,26 @@ object LineParser extends RegexParsers {
 		parseAll(line, arg.trim) match {
 			case Success((x ~ Some(list)), in) => (x, list)
 			case Success((x ~ None), in) => (x, Nil)
-			case Failure(msg, in) => throw new Exception(msg)
-			case Error(msg, in) => throw new Exception(msg)
+			case _ => (arg, Nil)
+		}
+	}
+
+	private val endsWithSpace = """.*\s""".r
+
+	//TODO: handle tab completing: /usr/bin/x<tab>
+	//TODO: uniqueify the completions
+	def complete(str: String): List[String] = {
+		val (cmd, args) = parse(str)
+		str match {
+			case endsWithSpace() =>
+				for(f <- new File(cd.prevDir).listFiles.toList) yield f.getName
+			case _ => {
+				if( args == Nil )
+					Executor.findOnPathPrefix(cmd)
+				else
+					for( f <- new File(cd.prevDir).listFiles.toList
+						if f.getName.startsWith(args.last)) yield f.getName
+			}
 		}
 	}
 }

@@ -6,6 +6,7 @@ case object Raw
 case object Stop
 case object Done
 case object Prompt
+case class RePrompt(msg: String)
 case class Output(msg: String)
 case class Message(msg: String)
 

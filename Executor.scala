@@ -45,7 +45,7 @@ class Executor {
 }
 
 object Executor {
-	//JVM probably does this too, which might cause some funny-ness
+	//JVM probably does this too, which might cause some funniness
 	def findOnPath(cmd: String): Option[String] = {
 		val executables = for( dir <- Environment.pathDirs; 
 			f <- dir.listFiles if f.getName == cmd && f.canExecute
@@ -54,5 +54,13 @@ object Executor {
 			None
 		else
 			Some(executables.head.getAbsolutePath)
+	}
+
+	//TODO: should probably do something more intelligent here...
+	// we really should tab-complete the max-len common prefix
+	def findOnPathPrefix(cmd: String): List[String] = {
+		for( dir <- Environment.pathDirs.toList; f <- dir.listFiles
+			if f.getName.startsWith(cmd) && f.canExecute
+		) yield f.getName
 	}
 }

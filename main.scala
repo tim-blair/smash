@@ -16,7 +16,6 @@ object ParseLine {
 }
 
 object MainActor extends Actor {
-	val parser = new LineParser
 	val exec = new Executor
 	def act() {
 		loop {
@@ -36,7 +35,7 @@ object MainActor extends Actor {
 						exit()
 					} else if(line != "") {
 						try {
-							val (cmd, args) = parser.parse(line)
+							val (cmd, args) = LineParser.parse(line)
 							if(BuiltinManager.contains(cmd)) {
 								BuiltinManager.handle(cmd, args)
 								this ! Next
