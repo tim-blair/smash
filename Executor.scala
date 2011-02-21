@@ -1,4 +1,5 @@
 import java.io.File
+import scala.collection.mutable.Set
 import scala.collection.JavaConverters._
 
 class Executor {
@@ -58,9 +59,11 @@ object Executor {
 
 	//TODO: should probably do something more intelligent here...
 	// we really should tab-complete the max-len common prefix
-	def findOnPathPrefix(cmd: String): List[String] = {
+	def findOnPathPrefix(cmd: String): Set[String] = {
+		var ret: Set[String] = Set()
 		for( dir <- Environment.pathDirs.toList; f <- dir.listFiles
 			if f.getName.startsWith(cmd) && f.canExecute
-		) yield f.getName
+		) ret += f.getName
+		ret
 	}
 }
