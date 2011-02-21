@@ -27,25 +27,13 @@ object InputBuilder extends Actor {
 						case '\t' => {
 							TabCompleter.complete(line.reverse.mkString) match {
 								case Nil => //No suggestions, do nothing
-								case x :: Nil => {
-									val s = line.reverse.mkString
-									val common = overlap(s, x)
-									//line = (x.replaceFirst(common, "").reverse
-										//++ line).toCharArray.toList
-									line = (s + x.replaceFirst(
-										overlap(s, x), "")).toCharArray.toList
-
-									Printer ! RePrompt(line.mkString)
-									line = line.reverse
-									//add suggestion minus already typed part
-								}
+								case x :: Nil => addCompletion(x)
 								case x => {
 									Printer ! Message("") //newline
 									//Show options
 									x.foreach(str => Printer ! Message(str))
-									//Reprint current line
-									Printer ! Prompt
-									Printer ! Output(line.reverse.mkString)
+									//Add common prefix to the line
+									addCompletion(x.foldLeft(x.head)(prefix))
 								}
 							}
 						}
@@ -70,5 +58,21 @@ object InputBuilder extends Actor {
 			first
 		else
 			overlap(first.tail, second)
+	}
+
+	def addCompletion(x: String) = {
+		val s = line.reverse.mkString
+		line = (s + x.replaceFirst(
+			overlap(s, x), "")).toCharArray.toList
+
+		Printer ! RePrompt(line.mkString)
+		line = line.reverse
+	}
+
+	def prefix(x: String, y: String): String = {
+		if( x == "" || y == "" || x.head != y.head )
+			""
+		else
+			x.head + prefix(x.tail, y.tail)
 	}
 }

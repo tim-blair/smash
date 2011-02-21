@@ -33,19 +33,28 @@ object TabCompleter extends RegexParsers {
 	private val endsWithSpace = """.*\s""".r
 
 	//TODO: handle tab completing: /usr/bin/x<tab>
-	//TODO: uniqueify the completions
 	def complete(str: String): List[String] = {
 		var ret: Set[String] = Set()
 		val (cmd, args) = parse(str)
 		str match {
 			case endsWithSpace() =>
-				for(f <- new File(cd.prevDir).listFiles.toList) ret += f.getName
+				for(f <- new File(cd.prevDir).listFiles.toList) {
+					if( f.isDirectory )
+						ret += f.getName + "/"
+					else
+						ret += f.getName
+				}
 			case _ => {
 				if( args == Nil )
 					ret = Executor.findOnPathPrefix(cmd)
 				else
 					for( f <- new File(cd.prevDir).listFiles.toList
-						if f.getName.startsWith(args.last)) ret += f.getName
+						if f.getName.startsWith(args.last)) {
+							if( f.isDirectory )
+								ret += f.getName + "/"
+							else
+								ret += f.getName
+					}
 			}
 		}
 		ret.toList
