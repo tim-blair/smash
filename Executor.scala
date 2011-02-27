@@ -56,14 +56,4 @@ object Executor {
 		else
 			Some(executables.head.getAbsolutePath)
 	}
-
-	//TODO: should probably do something more intelligent here...
-	// we really should tab-complete the max-len common prefix
-	def findOnPathPrefix(cmd: String): Set[String] = {
-		var ret: Set[String] = Set()
-		for( dir <- Environment.pathDirs.toList; f <- dir.listFiles
-			if f.getName.startsWith(cmd) && f.canExecute
-		) ret += f.getName
-		ret
-	}
 }
