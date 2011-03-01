@@ -27,47 +27,39 @@ object TabCompleter extends RegexParsers with LineParsing {
 						ret += f.getName
 				}
 			case _ => {
-				//TODO: dupblicate code in the 2 if cases, refactor
-				if( args == Nil ) {
-					var command = cmd
-					if(command.startsWith("."))
-						command = cd.prevDir + "/" + command
-					if(command.contains("/")) {
-						val split = command.reverse.split("/", 2)
-						val dir = 
-							if(split(1) == "") "/"
-							else split(1).reverse
-						buildCompletions(dir, split(0).reverse, ret)
-					} else
-						Environment.pathDirs.toList.foreach(dir =>
-							buildCompletions(dir, command, ret))
-				} else {
-					var lastArg = args.last
-					if(lastArg.startsWith("."))
-						lastArg = cd.prevDir + "/" + lastArg
-					if(lastArg.contains("/")) {
-						val split = lastArg.reverse.split("/", 2)
-						val dir = 
-							if(split(1) == "") "/"
-							else split(1).reverse
-						buildCompletions(dir, split(0).reverse, ret)
-					} else
-						buildCompletions(cd.prevDir, lastArg, ret)
-				}
+				if( args == Nil )
+					findCompletions(cmd, Environment.pathDirs.toList.map(_.getName), ret)
+				else
+					findCompletions(args.last, List(cd.prevDir), ret)
 			}
 		}
 		ret.toList
+	}
+
+	def findCompletions(arg: String, dirs: List[String], comps: Set[String]) = {
+		var prefix = arg
+		if(prefix.startsWith("."))
+			prefix = cd.prevDir + "/" + prefix
+		if(prefix.contains("/")) {
+			val split = prefix.reverse.split("/", 2)
+			val dir = 
+				if(split(1) == "") "/"
+				else split(1).reverse
+			buildCompletions(dir, split(0).reverse, comps)
+		} else
+			dirs.foreach(dir => buildCompletions(dir, prefix, comps))
 	}
 
 	def buildCompletions(dir: String, prefix: String, set: Set[String]): Unit = 
 		buildCompletions(new File(dir), prefix, set)
 
 	def buildCompletions(dir: File, prefix: String, set: Set[String]): Unit = {
-		for( f <- dir.listFiles.toList
-			if f.getName.startsWith(prefix))
-				set += f.getName + (
-					if(f.isDirectory) "/" 
-					else ""
-				)
+		if(dir.isDirectory)
+			for( f <- dir.listFiles.toList
+				if f.getName.startsWith(prefix))
+					set += f.getName + (
+						if(f.isDirectory) "/" 
+						else ""
+					)
 	}
 }
