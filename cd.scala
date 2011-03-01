@@ -3,8 +3,9 @@ import java.io.File
 object cd extends Builtin {
 	override val name = "cd"
 	//Get the current dir, or fall back to HOME, or just /home
-	var prevDir = Environment.env.getOrElse("PWD", 
+	var curDir = Environment.env.getOrElse("PWD", 
 		Environment.env.getOrElse("HOME", "/home"))
+	var prevDir = curDir
 
 	override def execute(args: List[String]) = {
 		//I think we just change the PWD variable
@@ -22,7 +23,7 @@ object cd extends Builtin {
 		val dir = if(newDir.startsWith("/"))
 			new File(newDir)
 		else
-			new File(prevDir + "/" + newDir)
+			new File(curDir + "/" + newDir)
 		if(!dir.exists)
 			throw new Exception("No such directory")
 		if(!dir.isDirectory)
@@ -30,6 +31,7 @@ object cd extends Builtin {
 
 		val canonicalPath = dir.getCanonicalPath
 		Environment.env.put("PWD", canonicalPath)
-		prevDir = canonicalPath
+		prevDir = curDir
+		curDir = canonicalPath
 	}
 }

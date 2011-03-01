@@ -19,13 +19,13 @@ object TabCompleter extends RegexParsers with LineParsing {
 		var comps: Set[String] = Set()
 		str match {
 			case endsWithSpace() =>
-				findCompletions("", List(cd.prevDir), comps)
+				findCompletions("", List(cd.curDir), comps)
 			case _ => {
 				val (cmd, args) = parse(str)
 				if( args == Nil )
 					findCompletions(cmd, Environment.pathDirs.toList.map(_.getName), comps)
 				else
-					findCompletions(args.last, List(cd.prevDir), comps)
+					findCompletions(args.last, List(cd.curDir), comps)
 			}
 		}
 		comps.toList
@@ -34,11 +34,11 @@ object TabCompleter extends RegexParsers with LineParsing {
 	def findCompletions(arg: String, dirs: List[String], comps: Set[String]) = {
 		var prefix = arg
 		if(prefix.startsWith("."))
-			prefix = cd.prevDir + "/" + prefix
+			prefix = cd.curDir + "/" + prefix
 		if(prefix.contains("/")) {
 			val (dir, pre) = prefix.splitAt(prefix.lastIndexOf("/") + 1)
 			if( !dir.startsWith("/") )
-				buildCompletions(cd.prevDir + "/" + dir, pre, comps)
+				buildCompletions(cd.curDir + "/" + dir, pre, comps)
 			else
 				buildCompletions(dir, pre, comps)
 		} else

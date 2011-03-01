@@ -7,7 +7,7 @@ class Executor {
 	//eventually it would be nice to be able to do pipes/redirection, etc
 	def execute(cmd: String, args: List[String]): Unit = {
 		if(cmd.startsWith("."))
-			return execute(cd.prevDir + "/" + cmd, args)
+			return execute(cd.curDir + "/" + cmd, args)
 		(if(cmd.contains("/")) {
 			if(new File(cmd).canExecute)
 				Some(cmd)
