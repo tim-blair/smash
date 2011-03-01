@@ -8,10 +8,9 @@ object cd extends Builtin {
 	var prevDir = curDir
 
 	override def execute(args: List[String]) = {
-		//I think we just change the PWD variable
 		val newDir:String = args match {
 			case "-" :: xs => prevDir
-			//ignore extraneous args... should we try to run them?
+			//ignore extraneous args... should we try to run them? yes, but not yet
 			case x :: xs => x
 			case Nil => {
 				Environment.env.get("HOME") match {
