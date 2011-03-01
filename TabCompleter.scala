@@ -16,24 +16,19 @@ object TabCompleter extends RegexParsers with LineParsing {
 	private val endsWithSpace = """.*\s""".r
 
 	def complete(str: String): List[String] = {
-		var ret: Set[String] = Set()
-		val (cmd, args) = parse(str)
+		var comps: Set[String] = Set()
 		str match {
 			case endsWithSpace() =>
-				for(f <- new File(cd.prevDir).listFiles.toList) {
-					if( f.isDirectory )
-						ret += f.getName + "/"
-					else
-						ret += f.getName
-				}
+				findCompletions("", List(cd.prevDir), comps)
 			case _ => {
+				val (cmd, args) = parse(str)
 				if( args == Nil )
-					findCompletions(cmd, Environment.pathDirs.toList.map(_.getName), ret)
+					findCompletions(cmd, Environment.pathDirs.toList.map(_.getName), comps)
 				else
-					findCompletions(args.last, List(cd.prevDir), ret)
+					findCompletions(args.last, List(cd.prevDir), comps)
 			}
 		}
-		ret.toList
+		comps.toList
 	}
 
 	def findCompletions(arg: String, dirs: List[String], comps: Set[String]) = {
@@ -41,11 +36,11 @@ object TabCompleter extends RegexParsers with LineParsing {
 		if(prefix.startsWith("."))
 			prefix = cd.prevDir + "/" + prefix
 		if(prefix.contains("/")) {
-			val split = prefix.reverse.split("/", 2)
-			val dir = 
-				if(split(1) == "") "/"
-				else split(1).reverse
-			buildCompletions(dir, split(0).reverse, comps)
+			val (dir, pre) = prefix.splitAt(prefix.lastIndexOf("/") + 1)
+			if( !dir.startsWith("/") )
+				buildCompletions(cd.prevDir + "/" + dir, pre, comps)
+			else
+				buildCompletions(dir, pre, comps)
 		} else
 			dirs.foreach(dir => buildCompletions(dir, prefix, comps))
 	}
