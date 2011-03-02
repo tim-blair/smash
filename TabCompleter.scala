@@ -5,6 +5,8 @@ import scala.collection.JavaConverters._
 
 object TabCompleter extends RegexParsers with LineParsing {
 
+	override def handleVariable(x: String) = "$" + x
+
 	def parse(arg: String): (String, List[String]) = {
 		parseAll(line, arg.trim) match {
 			case Success((x ~ Some(list)), in) => (x, list)
@@ -13,13 +15,17 @@ object TabCompleter extends RegexParsers with LineParsing {
 		}
 	}
 
+	//TODO: can we get away without these?
 	private val endsWithSpace = """.*\s""".r
+	private val Variable = """.*\$([a-zA-Z_]+)""".r
 
 	def complete(str: String): List[String] = {
 		var comps: Set[String] = Set()
 		str match {
 			case endsWithSpace() =>
 				findCompletions("", List(cd.curDir), comps)
+			case Variable(name) =>
+				Environment.env.keys.filter(x => x.startsWith(name)).foreach(x => comps += x)
 			case _ => {
 				val (cmd, args) = parse(str)
 				if( args == Nil )

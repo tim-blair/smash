@@ -10,11 +10,16 @@ trait LineParsing extends RegexParsers {
 	// Not sure if '=' is valid for a cmd, but it is for an arg
 	def chars: Parser[String] = """[-\w./+=]+""".r
 	def ws: Parser[Unit] = """\s+""".r ^^ (x => Unit)
+	//I don't like numbers in variables, so for now they're illegal
+	def variable: Parser[String] = "$" ~> """[_a-zA-Z]+""".r ^^ (x => handleVariable(x))
 	def str: Parser[String] = "'" ~> "[^']+".r <~ "'"
 	def string: Parser[String] = "\"" ~> """[^"]+""".r <~ "\""
-	def command: Parser[String] = chars
-	def argument: Parser[String] = (string | str | chars)
+	def command: Parser[String] = variable | chars
+	def argument: Parser[String] = (string | str | variable | chars)
 	def line: Parser[String ~ Option[List[String]]] = 
 		(command | failure("Could not parse command")) ~ 
 			opt(rep(ws ~> argument))
+
+	def handleVariable(x: String) =
+		Environment.env.getOrElse(x, "")
 }
