@@ -29,7 +29,7 @@ object TabCompleter extends RegexParsers with LineParsing {
 			case _ => {
 				val (cmd, args) = parse(str)
 				if( args == Nil )
-					findCompletions(cmd, Environment.pathDirs.toList.map(_.getName), comps)
+					findCompletions(cmd, Environment.pathDirs.toList.map(_.getCanonicalPath), comps)
 				else
 					findCompletions(args.last, List(cd.curDir), comps)
 			}
