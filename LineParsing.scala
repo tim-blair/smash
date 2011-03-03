@@ -1,6 +1,7 @@
 import scala.util.parsing.combinator._
 
-//For now, no backslash, or any fanciness, really
+// TODO: I should probably make parsing and lexing separate steps
+// especially since tab completion is necessarily different from normal
 trait LineParsing extends RegexParsers {
 //Give me my whitespace!
 //thanks to http://oldfashionedsoftware.com/2008/08/16/easy-parsing-in-scala/
@@ -15,7 +16,7 @@ trait LineParsing extends RegexParsers {
 	def str: Parser[String] = "'" ~> "[^']+".r <~ "'"
 	def string: Parser[String] = "\"" ~> """[^"]+""".r <~ "\""
 	def command: Parser[String] = variable | chars
-	def argument: Parser[String] = (string | str | variable | chars)
+	def argument: Parser[String] = string | str | variable | chars
 	def line: Parser[String ~ Option[List[String]]] = 
 		(command | failure("Could not parse command")) ~ 
 			opt(rep(ws ~> argument))
