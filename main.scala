@@ -35,7 +35,7 @@ object MainActor extends Actor {
 						exit()
 					} else if(line != "") {
 						try {
-							val (cmd, args) = LineParser.parse(line)
+							val (cmd, args) = LineParser.process(line)
 							if(BuiltinManager.contains(cmd)) {
 								BuiltinManager.handle(cmd, args)
 								this ! Next

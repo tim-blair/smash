@@ -3,39 +3,32 @@ import scala.collection.mutable.Set
 import scala.util.parsing.combinator._
 import scala.collection.JavaConverters._
 
-object TabCompleter extends RegexParsers with LineParsing {
-
-	override def handleVariable(x: String) = "$" + x
-
-	def parse(arg: String): (String, List[String]) = {
-		parseAll(line, arg.trim) match {
-			case Success((x ~ Some(list)), in) => (x, list)
-			case Success((x ~ None), in) => (x, Nil)
-			case _ => (arg, Nil)
-		}
-	}
-
-	//TODO: can we get away without these?
-	private val endsWithSpace = """.*\s""".r
-	private val Variable = """.*\$([a-zA-Z_]+)""".r
+object TabCompleter extends LineParsing {
 
 	def complete(str: String): List[String] = {
 		var comps: Set[String] = Set()
-		str match {
-			case endsWithSpace() =>
-				findCompletions("", List(cd.curDir), comps)
-			case Variable(name) =>
-				Environment.env.keys.filter(x => x.startsWith(name)).foreach(x => comps += x)
-			case _ => {
-				val (cmd, args) = parse(str)
-				if( args == Nil )
-					findCompletions(cmd, Environment.pathDirs.toList.map(_.getCanonicalPath), comps)
-				else
-					findCompletions(args.last, List(cd.curDir), comps)
+		val tokens = parse(str)
+		if( tokens == Nil )
+			findCommandCompletions("", comps) //Really this is where the "List a million possiblities (y/n)" should be
+		else {
+			tokens.last match {
+				case WhiteSpace(x) =>
+					findCompletions("", List(cd.curDir), comps)
+				case Variable(x) => Environment.env.keys.filter(k => k.startsWith(x)).foreach(v => comps += v)
+				case _ => tokens match {
+					case x :: Nil => 
+						findCommandCompletions(x(), comps)
+					case x :: xs =>
+						findCompletions(xs.reverse.takeWhile(_.isStringToken).reverse.mkString, List(cd.curDir), comps)
+					case _ => //do nothing -- should never happen
+				}
 			}
 		}
 		comps.toList
 	}
+
+	def findCommandCompletions(cmd: String, comps: Set[String]) =
+		findCompletions(cmd, Environment.pathDirs.toList.map(_.getCanonicalPath), comps)
 
 	def findCompletions(arg: String, dirs: List[String], comps: Set[String]) = {
 		var prefix = arg

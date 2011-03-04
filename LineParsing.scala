@@ -1,7 +1,5 @@
 import scala.util.parsing.combinator._
 
-// TODO: I should probably make parsing and lexing separate steps
-// especially since tab completion is necessarily different from normal
 trait LineParsing extends RegexParsers {
 //Give me my whitespace!
 //thanks to http://oldfashionedsoftware.com/2008/08/16/easy-parsing-in-scala/
@@ -9,18 +7,22 @@ trait LineParsing extends RegexParsers {
 	override def skipWhitespace = false
 
 	// Not sure if '=' is valid for a cmd, but it is for an arg
-	def chars: Parser[String] = """[-\w./+=]+""".r
-	def ws: Parser[Unit] = """\s+""".r ^^ (x => Unit)
+	def chars: Parser[Token] = """[-\w./+=]+""".r ^^ (x => new LiteralString(x))
+	def ws: Parser[Token] = """\s+""".r ^^ (x => new WhiteSpace(x))
 	//I don't like numbers in variables, so for now they're illegal
-	def variable: Parser[String] = "$" ~> """[_a-zA-Z]+""".r ^^ (x => handleVariable(x))
-	def str: Parser[String] = "'" ~> "[^']+".r <~ "'"
-	def string: Parser[String] = "\"" ~> """[^"]+""".r <~ "\""
-	def command: Parser[String] = variable | chars
-	def argument: Parser[String] = string | str | variable | chars
-	def line: Parser[String ~ Option[List[String]]] = 
-		(command | failure("Could not parse command")) ~ 
-			opt(rep(ws ~> argument))
+	def variable: Parser[Token] = "$" ~> """[_a-zA-Z]+""".r ^^ (x => new Variable(x))
+	def str: Parser[Token] = "'" ~> "[^']+".r <~ "'" ^^ (x => new SingleString(x))
+	def string: Parser[Token] = "\"" ~> """[^"]+""".r <~ "\"" ^^ (x => new DoubleString(x))
+	def tokens: Parser[List[Token ~ Option[Token]]] = opt(ws) ~> rep((variable | str | string | chars) ~ opt(ws))
 
-	def handleVariable(x: String) =
-		Environment.env.getOrElse(x, "")
+	def parse(arg: String): List[Token] = {
+		parseAll(tokens, arg) match {
+			case Success(list, in) => list.map(_ match {
+				case x ~ None => x :: Nil
+				case x ~ Some(y) => List(x, y)
+			}).flatten
+			case Failure(msg, in) => throw new Exception(msg)
+			case Error(msg, in) => throw new Exception(msg)
+		}
+	}
 }
