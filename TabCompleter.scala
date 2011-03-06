@@ -9,7 +9,7 @@ object TabCompleter extends LineParsing {
 		var comps: Set[String] = Set()
 		val tokens = parse(str)
 		if( tokens == Nil )
-			findCommandCompletions("", comps) //Really this is where the "List a million possiblities (y/n)" should be
+			findCommandCompletions("", comps) //this is where the "List a million possiblities (y/n)" would help
 		else {
 			tokens.last match {
 				case WhiteSpace(x) =>

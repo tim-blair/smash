@@ -1,3 +1,4 @@
+import scala.util.parsing.combinator._
 trait Token {
 	def apply(): String = toString
 	val isStringToken = false
@@ -13,11 +14,25 @@ case class SingleString(str: String) extends Token {
 	override def toString = str
 	override val isStringToken = true 
 }
-case class DoubleString(str: String) extends Token {
-	//TODO: strip quotes, and interpret variables inside
-	override def toString = str
+case class DoubleString(str: String) extends Token with RegexParsers {
+	override def toString = out
 	override val isStringToken = true 
-	//TODO: probably extend regexparsing so I can interpret strings correctly
+	private lazy val out =
+		parse(str)
+	//I don't like numbers in variables, so for now they're illegal
+	//TODO: these 2 are the same as LineParsing
+	override def skipWhitespace = false
+	def variable: Parser[Token] = "$" ~> """[_a-zA-Z]+""".r ^^ (x => new Variable(x))
+	def literal: Parser[Token] = """[^$]""".r ^^ (x => new LiteralString(x))
+	def tokens: Parser[List[Token]] = rep(variable | literal)
+
+	def parse(arg: String): String = {
+		parseAll(tokens, arg) match {
+			case Success(list, in) => list.map(_()).mkString
+			case Failure(msg, in) => throw new Exception(msg)
+			case Error(msg, in) => throw new Exception(msg)
+		}
+	}
 }
 case class LiteralString(str: String) extends Token {
 	override def toString = str
