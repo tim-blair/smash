@@ -25,7 +25,7 @@ object TabCompleter extends LineParsing {
 			case Variable(x) => 
 				Environment.env.keys.filter(k => k.startsWith(x)).foreach(v => comps += v)
 			case ds: OpenDoubleString =>
-				completeToken(ds.tokenize, comps)
+				completeToken(tokens.init ::: ds.tokenize, comps)
 			case _ => tokens match {
 				case x :: Nil => 
 					findCommandCompletions(x(), comps)

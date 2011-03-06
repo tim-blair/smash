@@ -27,7 +27,7 @@ class DoubleStrToken(str: String) extends Token with RegexParsers {
 	//TODO: these 2 are the same as LineParsing
 	override def skipWhitespace = false
 	def variable: Parser[Token] = "$" ~> """[_a-zA-Z]+""".r ^^ (x => new Variable(x))
-	def literal: Parser[Token] = """[^$]""".r ^^ (x => new LiteralString(x))
+	def literal: Parser[Token] = """[^$]+""".r ^^ (x => new LiteralString(x))
 	def tokens: Parser[List[Token]] = rep(variable | literal)
 
 	def parse(arg: String): String = {
