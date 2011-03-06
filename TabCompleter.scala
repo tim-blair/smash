@@ -4,27 +4,36 @@ import scala.util.parsing.combinator._
 import scala.collection.JavaConverters._
 
 object TabCompleter extends LineParsing {
+	def openString: Parser[Token] = "\"" ~> """[^"]+""".r ^^ (x => new OpenDoubleString(x))
+	def openStr: Parser[Token] = "'" ~> "[^']+".r ^^ (x => new OpenSingleString(x))
+	override def tokens: Parser[List[Token ~ Option[Token]]] = opt(ws) ~> rep((variable | str | openStr | string | openString | chars) ~ opt(ws))
 
 	def complete(str: String): List[String] = {
 		var comps: Set[String] = Set()
 		val tokens = parse(str)
 		if( tokens == Nil )
 			findCommandCompletions("", comps) //this is where the "List a million possiblities (y/n)" would help
-		else {
-			tokens.last match {
-				case WhiteSpace(x) =>
-					findCompletions("", List(cd.curDir), comps)
-				case Variable(x) => Environment.env.keys.filter(k => k.startsWith(x)).foreach(v => comps += v)
-				case _ => tokens match {
-					case x :: Nil => 
-						findCommandCompletions(x(), comps)
-					case x :: xs =>
-						findCompletions(xs.reverse.takeWhile(_.isStringToken).reverse.mkString, List(cd.curDir), comps)
-					case _ => //do nothing -- should never happen
-				}
+		else 
+			completeToken(tokens, comps)
+		comps.toList
+	}
+
+	def completeToken(tokens: List[Token], comps: Set[String]): Unit = {
+		tokens.last match {
+			case WhiteSpace(x) =>
+				findCompletions("", List(cd.curDir), comps)
+			case Variable(x) => 
+				Environment.env.keys.filter(k => k.startsWith(x)).foreach(v => comps += v)
+			case ds: OpenDoubleString =>
+				completeToken(ds.tokenize, comps)
+			case _ => tokens match {
+				case x :: Nil => 
+					findCommandCompletions(x(), comps)
+				case x :: xs =>
+					findCompletions(xs.reverse.takeWhile(_.isStringToken).reverse.mkString, List(cd.curDir), comps)
+				case _ => //do nothing -- should never happen
 			}
 		}
-		comps.toList
 	}
 
 	def findCommandCompletions(cmd: String, comps: Set[String]) =

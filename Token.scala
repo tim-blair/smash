@@ -14,7 +14,11 @@ case class SingleString(str: String) extends Token {
 	override def toString = str
 	override val isStringToken = true 
 }
-case class DoubleString(str: String) extends Token with RegexParsers {
+case class OpenSingleString(str: String) extends Token {
+	override def toString = str
+	override val isStringToken = true 
+}
+class DoubleStrToken(str: String) extends Token with RegexParsers {
 	override def toString = out
 	override val isStringToken = true 
 	private lazy val out =
@@ -29,6 +33,17 @@ case class DoubleString(str: String) extends Token with RegexParsers {
 	def parse(arg: String): String = {
 		parseAll(tokens, arg) match {
 			case Success(list, in) => list.map(_()).mkString
+			case Failure(msg, in) => throw new Exception(msg)
+			case Error(msg, in) => throw new Exception(msg)
+		}
+	}
+}
+case class DoubleString(private val str: String) extends DoubleStrToken(str) {
+}
+case class OpenDoubleString(private val str: String) extends DoubleStrToken(str) {
+	def tokenize(): List[Token] = {
+		parseAll(tokens, str) match {
+			case Success(list, in) => list
 			case Failure(msg, in) => throw new Exception(msg)
 			case Error(msg, in) => throw new Exception(msg)
 		}
