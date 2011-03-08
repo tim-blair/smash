@@ -17,8 +17,7 @@ class Executor {
 			Executor.findOnPath(cmd)
 		) match {
 			case Some(s) => 
-				//TODO: use a regex for this: "(.*/)?vim" should do it
-				if(cmd == "vim") new Launcher().runVim
+				if( cmd == "vim" || cmd.endsWith("/vim") ) new Launcher().runVim
 				else run(s :: args)
 			//TODO: differentiate between not found and not allowed
 			case None => {

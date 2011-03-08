@@ -1,14 +1,13 @@
 object BuiltinManager {
 	//This should really be a set/map, and we can just do a get...
-	private val builtins: List[Builtin] = List(cd, which)
+	private val builtins: List[Builtin] = List(cd, which, tag)
 
-	def names =
-		for(b <- builtins) yield b.name
+	lazy val names = for(b <- builtins) yield b.name
 
-	def handle(cmd: String, args: List[String]) = {
+	def handle(cmd: String, args: List[String]): Option[MainMessage] = {
 		builtins.filter(b => b.name == cmd) match {
-			case x :: xs => { x.execute(args); true }
-			case Nil => false
+			case x :: xs => x.execute(args)
+			case Nil => None
 		}
 	}
 

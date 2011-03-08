@@ -1,5 +1,7 @@
 import scala.actors._
 
+trait MainMessage
+
 case object Cook
 case object Raw
 
@@ -17,10 +19,10 @@ case object LeftArrow
 case object RightArrow
 case object Backspace
 case class Character(msg: Char)
-case class Line(line: String)
+case class Line(line: String) extends MainMessage
 
 case class Read(actor: Actor)
 case class ReadLine(actor: Actor)
 case class ReadAvail(actor: Actor)
 case class ReadIfAvail(actor: Actor)
-case object Next
+case object Next extends MainMessage

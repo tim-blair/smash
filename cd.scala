@@ -32,5 +32,6 @@ object cd extends Builtin {
 		Environment.env.put("PWD", canonicalPath)
 		prevDir = curDir
 		curDir = canonicalPath
+		None
 	}
 }

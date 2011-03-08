@@ -37,8 +37,10 @@ object MainActor extends Actor {
 						try {
 							val (cmd, args) = LineParser.process(line)
 							if(BuiltinManager.contains(cmd)) {
-								BuiltinManager.handle(cmd, args)
-								this ! Next
+								BuiltinManager.handle(cmd, args) match {
+									case Some(msg) => this ! msg
+									case None => this ! Next
+								}
 							} else
 								//TODO: make this a message
 								exec.execute(cmd, args)
