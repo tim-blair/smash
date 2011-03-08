@@ -1,5 +1,4 @@
 import java.io.File
-import scala.collection.mutable.Set
 
 object tag extends Builtin {
 	override val name = "tag"

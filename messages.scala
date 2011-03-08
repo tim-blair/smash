@@ -5,7 +5,7 @@ trait MainMessage
 case object Cook
 case object Raw
 
-case object Stop
+case object Stop extends MainMessage
 case object Done
 case object Prompt
 case class RePrompt(msg: String)

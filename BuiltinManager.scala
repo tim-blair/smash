@@ -1,6 +1,6 @@
 object BuiltinManager {
 	//This should really be a set/map, and we can just do a get...
-	private val builtins: List[Builtin] = List(cd, which, tag)
+	private val builtins: List[Builtin] = List(cd, which, tag, exit)
 
 	lazy val names = for(b <- builtins) yield b.name
 

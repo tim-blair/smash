@@ -25,15 +25,15 @@ object MainActor extends Actor {
 					Printer ! Prompt
 					InputBuilder ! ReadLine(this)
 				}
+				case Stop => {
+					Printer ! Stop
+					InputReader ! Stop
+					InputBuilder ! Stop
+					exit()
+				}
 				case Line(line) => {
 					InputReader ! Cook
-					//TODO: exit should be a builtin
-					if(line == "exit") {
-						Printer ! Stop
-						InputReader ! Stop
-						InputBuilder ! Stop
-						exit()
-					} else if(line != "") {
+					if(line != "") {
 						try {
 							val (cmd, args) = LineParser.process(line)
 							if(BuiltinManager.contains(cmd)) {
