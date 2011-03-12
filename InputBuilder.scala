@@ -1,26 +1,44 @@
 import scala.actors._
 
 object InputBuilder extends Actor {
+	// List probably isn't the ideal data-structure, but it should be good enough for now
+	var history: List[String] = Nil
+	var future: List[String] = Nil
 	var line: List[Char] = Nil
 	var requester: Actor = this //ignore msgs to start
 	def act() {
 		loop {
 			react {
 				case Stop => exit()
-				case UpArrow => "" //we don't have a history yet
-				case DownArrow => "" //we don't have a history yet
-				case LeftArrow => "" //we don't have a history yet
-				case RightArrow => "" //we don't have a history yet
+				case UpArrow => {
+					val newLine = history.head
+					history = history.tail
+					future = newLine :: future
+					line = newLine.reverse.toCharArray.toList //TODO: implicit this
+					Printer ! RePrompt(newLine)
+				}
+				case DownArrow => { //TODO: up and down are exactly the same right now...
+					val newLine = future.head
+					future = future.tail
+					history = newLine :: history 
+					line = newLine.reverse.toCharArray.toList //TODO: implicit this
+					Printer ! RePrompt(newLine)
+				}
+				case LeftArrow => "" //we don't handle this yet
+				case RightArrow => "" //we don't handle this yet
 				case Backspace => {
 					if(!line.isEmpty) {
 						line = line.tail
 						Printer ! Backspace
 					}
 				}
-				case Character(10) => {
-					requester ! Line(line.reverse.mkString)
+				case Character('\n') => {
+					val ln = line.reverse.mkString
+					requester ! Line(ln)
+					history = ln :: future.reverse ::: history
+					future = Nil
 					line = Nil
-					Printer ! Character('\012')
+					Printer ! Character('\n')
 				}
 				case Character(x) => {
 					x match {
