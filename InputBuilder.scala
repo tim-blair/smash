@@ -10,24 +10,14 @@ object InputBuilder extends Actor {
 		loop {
 			react {
 				case Stop => exit()
-				case UpArrow => {
-					if( history != Nil ) {
-						val newLine = history.head
-						history = history.tail
-						future = newLine :: future
-						line = newLine.reverse.toCharArray.toList //TODO: implicit this
-						Printer ! RePrompt(newLine)
-					}
-				}
-				case DownArrow => { //TODO: up and down are exactly the same right now...
-					if( future != Nil ) {
-						val newLine = future.head
-						future = future.tail
-						history = newLine :: history 
-						line = newLine.reverse.toCharArray.toList //TODO: implicit this
-						Printer ! RePrompt(newLine)
-					}
-				}
+				case UpArrow =>
+					val (h, f) = updateHistory(history, future)
+					history = h
+					future = f
+				case DownArrow =>
+					val (f, h) = updateHistory(future, history)
+					history = h
+					future = f
 				case LeftArrow => "" //we don't handle this yet
 				case RightArrow => "" //we don't handle this yet
 				case Backspace => {
@@ -73,6 +63,21 @@ object InputBuilder extends Actor {
 		}
 	}
 
+	def updateHistory(rem: List[String], add: List[String]): (List[String], List[String]) = {
+		var src = rem
+		var dest = add
+		if( src != Nil ) {
+			val newLine = src.head
+			val tail = src.tail
+			if( tail != Nil ) {
+				src = src.tail
+				dest = newLine :: dest 
+			}
+			line = newLine.reverse.toCharArray.toList //TODO: implicit this
+			Printer ! RePrompt(newLine)
+		}
+		(src, dest)
+	}
 	//Find the overlap between the end of first and the start of second
 	//e.g. first = "cd abc" second = "abcdef" --> "abc"
 	def overlap(first: String, second: String): String = {
