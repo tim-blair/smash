@@ -11,18 +11,22 @@ object InputBuilder extends Actor {
 			react {
 				case Stop => exit()
 				case UpArrow => {
-					val newLine = history.head
-					history = history.tail
-					future = newLine :: future
-					line = newLine.reverse.toCharArray.toList //TODO: implicit this
-					Printer ! RePrompt(newLine)
+					if( history != Nil ) {
+						val newLine = history.head
+						history = history.tail
+						future = newLine :: future
+						line = newLine.reverse.toCharArray.toList //TODO: implicit this
+						Printer ! RePrompt(newLine)
+					}
 				}
 				case DownArrow => { //TODO: up and down are exactly the same right now...
-					val newLine = future.head
-					future = future.tail
-					history = newLine :: history 
-					line = newLine.reverse.toCharArray.toList //TODO: implicit this
-					Printer ! RePrompt(newLine)
+					if( future != Nil ) {
+						val newLine = future.head
+						future = future.tail
+						history = newLine :: history 
+						line = newLine.reverse.toCharArray.toList //TODO: implicit this
+						Printer ! RePrompt(newLine)
+					}
 				}
 				case LeftArrow => "" //we don't handle this yet
 				case RightArrow => "" //we don't handle this yet
