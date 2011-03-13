@@ -4,7 +4,10 @@ headers = target/headers
 classDir = target/classes
 soDir = target/resources
 soFile = $(soDir)/libLauncher.so
-build: gen_header
+
+all: sharedobj
+
+sharedobj: gen_header
 	gcc -shared -I/opt/java/include/ -I/opt/java/include/linux -o $(soFile) $(native)/Launcher.c -fPIC
 
 gen_header: scala
