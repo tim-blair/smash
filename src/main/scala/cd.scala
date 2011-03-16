@@ -7,8 +7,8 @@ object cd extends Builtin {
 		Environment.env.getOrElse("HOME", "/home"))
 	var prevDir = curDir
 
-	override def execute(args: List[String]) = {
-		val newDir:String = args match {
+	override def execute(args: String) = {
+		val newDir: String = DefaultParser.parseArgs(args) match {
 			case "-" :: xs => prevDir
 			//ignore extraneous args... should we try to run them? yes, but not yet
 			case x :: xs => x

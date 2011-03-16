@@ -5,8 +5,8 @@ object tag extends Builtin {
 	private val exec = new Executor
 	val root = new File(Environment.env.getOrElse("HOME", "/tmp") + "/.tags")
 
-	override def execute(args: List[String]) = {
-		args match {
+	override def execute(args: String) = {
+		DefaultParser.parseArgs(args) match {
 			case Nil => {
 				val list = root.list
 				if( list != null ) //yargh, java

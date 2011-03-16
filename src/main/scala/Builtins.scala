@@ -1,4 +1,4 @@
 trait Builtin {
-	def execute(args: List[String]): Option[MainMessage]
+	def execute(args: String): Option[MainMessage]
 	val name = ""
 }

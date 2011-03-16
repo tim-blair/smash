@@ -5,7 +5,7 @@ import scala.collection.JavaConverters._
 class Executor {
 	//Right now we just print the output, but...
 	//eventually it would be nice to be able to do pipes/redirection, etc
-	def execute(cmd: String, args: List[String]): Unit = {
+	def execute(cmd: String, args: String): Unit = {
 		if(cmd.startsWith("."))
 			return execute(cd.curDir + "/" + cmd, args)
 		(if(cmd.contains("/")) {
@@ -18,7 +18,7 @@ class Executor {
 		) match {
 			case Some(s) => 
 				if( cmd == "vim" || cmd.endsWith("/vim") ) new Launcher().runVim
-				else run(s :: args)
+				else run(s :: DefaultParser.parseArgs(args))
 			//TODO: differentiate between not found and not allowed
 			case None => {
 				Printer ! Message("Command not found: " + cmd)

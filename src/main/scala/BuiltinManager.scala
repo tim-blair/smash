@@ -4,7 +4,7 @@ object BuiltinManager {
 
 	lazy val names = for(b <- builtins) yield b.name
 
-	def handle(cmd: String, args: List[String]): Option[MainMessage] = {
+	def handle(cmd: String, args: String): Option[MainMessage] = {
 		builtins.filter(b => b.name == cmd) match {
 			case x :: xs => x.execute(args)
 			case Nil => None

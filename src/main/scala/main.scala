@@ -35,15 +35,15 @@ object MainActor extends Actor {
 					InputReader ! Cook
 					if(line != "") {
 						try {
-							val (cmd, args) = LineParser.process(line)
+							val (cmd, remainder) = CommandParser.parseCommand(line)
 							if(BuiltinManager.contains(cmd)) {
-								BuiltinManager.handle(cmd, args) match {
+								BuiltinManager.handle(cmd, remainder) match {
 									case Some(msg) => this ! msg
 									case None => this ! Next
 								}
 							} else
 								//TODO: make this a message
-								exec.execute(cmd, args)
+								exec.execute(cmd, remainder)
 						} catch {
 							case e: Exception => Printer ! Message(e.getMessage)
 							this ! Next

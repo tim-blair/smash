@@ -1,8 +1,8 @@
 object which extends Builtin {
 	override val name = "which"
 
-	override def execute(args: List[String]) = {
-		args.foreach(arg => {
+	override def execute(args: String) = {
+		DefaultParser.parseArgs(args).foreach(arg => {
 			if(BuiltinManager.contains(arg))
 				Printer ! Message(arg + ": shell built-in command")
 			else {
