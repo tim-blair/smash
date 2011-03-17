@@ -1,7 +1,6 @@
 import scala.util.parsing.combinator._
 
 trait LineParsing extends ItemParsing {
-	def tokens: Parser[List[Token ~ Option[Token]]] = opt(ws) ~> rep((variable | str | string | chars) ~ opt(ws))
 
 	def parse(arg: String): List[Token] = {
 		parseAll(tokens, arg) match {

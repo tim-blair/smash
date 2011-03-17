@@ -11,8 +11,16 @@ trait ItemParsing extends RegexParsers {
 	def ws: Parser[Token] = """\s+""".r ^^ (x => new WhiteSpace(x))
 	//I don't like numbers in variables, so for now they're illegal
 	def variable: Parser[Token] = "$" ~> """[_a-zA-Z]+""".r ^^ (x => new Variable(x))
-	def str: Parser[Token] = "'" ~> "[^']+".r <~ "'" ^^ (x => new SingleString(x))
-	def string: Parser[Token] = "\"" ~> """[^"]+""".r <~ "\"" ^^ (x => new DoubleString(x))
+	def singleStr: Parser[Token] = "'" ~> "[^']+".r <~ "'" ^^ (x => new SingleString(x))
+	def doubleStr: Parser[Token] = "\"" ~> """[^"]+""".r <~ "\"" ^^ (x => new DoubleString(x))
 
-	def token: Parser[List[Token]] = opt(ws) ~> rep(variable | str | string | chars)
+	def token: Parser[List[Token]] = opt(ws) ~> rep1(variable | singleStr | doubleStr | chars)
+	def tokens: Parser[List[Token ~ Option[Token]]] = opt(ws) ~> rep((variable | singleStr | doubleStr | chars) ~ opt(ws))
+
+	protected def toStringList(x: List[Token]): List[String] = {
+		if( x == Nil )
+			Nil
+		else
+			x.takeWhile(_.isStringToken).mkString :: toStringList(x.dropWhile(_.isStringToken).drop(1))
+	}
 }

@@ -6,7 +6,7 @@ import scala.collection.JavaConverters._
 object TabCompleter extends LineParsing {
 	def openString: Parser[Token] = "\"" ~> """[^"]+""".r ^^ (x => new OpenDoubleString(x))
 	def openStr: Parser[Token] = "'" ~> "[^']+".r ^^ (x => new OpenSingleString(x))
-	override def tokens: Parser[List[Token ~ Option[Token]]] = opt(ws) ~> rep((variable | str | openStr | string | openString | chars) ~ opt(ws))
+	override def tokens: Parser[List[Token ~ Option[Token]]] = opt(ws) ~> rep((variable | singleStr | openStr | doubleStr | openString | chars) ~ opt(ws))
 
 	def complete(str: String): List[String] = {
 		var comps: Set[String] = Set()
