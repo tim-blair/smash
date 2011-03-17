@@ -36,14 +36,19 @@ object MainActor extends Actor {
 					if(line != "") {
 						try {
 							val (cmd, remainder) = CommandParser.parseCommand(line)
-							if(BuiltinManager.contains(cmd)) {
-								BuiltinManager.handle(cmd, remainder) match {
-									case Some(msg) => this ! msg
-									case None => this ! Next
+							alias.aliases.get(cmd) match {
+								case Some(value) => this ! Line(value + remainder)
+								case None => {
+									if(BuiltinManager.contains(cmd)) {
+										BuiltinManager.handle(cmd, remainder) match {
+											case Some(msg) => this ! msg
+											case None => this ! Next
+										}
+									} else
+										//TODO: make this a message
+										exec.execute(cmd, remainder)
 								}
-							} else
-								//TODO: make this a message
-								exec.execute(cmd, remainder)
+							}
 						} catch {
 							case e: Exception => Printer ! Message(e.getMessage)
 							this ! Next
