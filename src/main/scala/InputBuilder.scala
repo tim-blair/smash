@@ -66,16 +66,16 @@ object InputBuilder extends Actor {
 	def updateHistory(rem: List[String], add: List[String]): (List[String], List[String]) = {
 		var src = rem
 		var dest = add
-		if( src != Nil ) {
-			val newLine = src.head
-			val tail = src.tail
-			if( tail != Nil ) {
-				src = src.tail
-				dest = newLine :: dest 
-			}
-			line = newLine.reverse.toCharArray.toList //TODO: implicit this
-			Printer ! RePrompt(newLine)
-		}
+		val newLine = if( src != Nil ) {
+			val head = src.head
+			src = src.tail
+			dest = head :: dest 
+			head
+		} else //arrow clears the line
+			""
+
+		line = newLine.reverse.toCharArray.toList
+		Printer ! RePrompt(newLine)
 		(src, dest)
 	}
 	//Find the overlap between the end of first and the start of second
