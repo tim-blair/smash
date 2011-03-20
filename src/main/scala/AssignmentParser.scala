@@ -1,10 +1,10 @@
 import scala.util.parsing.combinator._
 
-object AliasParser extends ItemParsing {
+object AssignmentParser extends ItemParsing {
 	override def chars: Parser[Token] = """[-\w./+]+""".r ^^ (x => new LiteralString(x))
 	def equalsSign: Parser[Token] = "=" ^^ (x => new EqualsSign(x))
-	def alias: Parser[List[Token] ~ Option[List[Token]]] = token ~ opt(opt(ws) ~> (equalsSign ~> token))
-	def args: Parser[List[List[Token] ~ Option[List[Token]]]] = rep1(alias) <~ opt(ws)
+	def name: Parser[List[Token] ~ Option[List[Token]]] = token ~ opt(opt(ws) ~> (equalsSign ~> token))
+	def args: Parser[List[List[Token] ~ Option[List[Token]]]] = rep1(name) <~ opt(ws)
 	
 	def parse(arg: String): List[(String, Option[String])] = {
 		parseAll(args, arg) match {
