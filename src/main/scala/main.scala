@@ -37,17 +37,11 @@ object MainActor extends Actor {
 						try {
 							val (cmd, remainder) = CommandParser.parseCommand(line)
 							alias.aliases.get(cmd) match {
-								case Some(value) => this ! Line(value + remainder)
-								case None => {
-									if(BuiltinManager.contains(cmd)) {
-										BuiltinManager.handle(cmd, remainder) match {
-											case Some(msg) => this ! msg
-											case None => this ! Next
-										}
-									} else
-										//TODO: make this a message
-										exec.execute(cmd, remainder)
+								case Some(value) => {
+									val (command, rem) = CommandParser.parseCommand(value + remainder)
+									processCommand(command, rem)
 								}
+								case None => processCommand(cmd, remainder)
 							}
 						} catch {
 							case e: Exception => Printer ! Message(e.getMessage)
@@ -60,5 +54,16 @@ object MainActor extends Actor {
 				}
 			}
 		}
+	}
+
+	def processCommand(cmd: String, remainder: String) = {
+		if(BuiltinManager.contains(cmd)) {
+			BuiltinManager.handle(cmd, remainder) match {
+				case Some(msg) => this ! msg
+				case None => this ! Next
+			}
+		} else
+			//TODO: make this a message
+			exec.execute(cmd, remainder)
 	}
 }
